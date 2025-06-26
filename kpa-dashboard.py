@@ -13,10 +13,18 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- Image Path Configuration (Relative for deployment) ---
+# --- Absolute Image Paths for Local Machine ---
 IMAGE_PATHS = {
-    f"image{i+1}": os.path.join("images", f"output_0_{i}.png")
-    for i in range(10)
+    "image1": r"C:\Users\Administrator\Desktop\kpa work\output_0_0.png",
+    "image2": r"C:\Users\Administrator\Desktop\kpa work\output_0_1.png",
+    "image3": r"C:\Users\Administrator\Desktop\kpa work\output_0_2.png",
+    "image4": r"C:\Users\Administrator\Desktop\kpa work\output_0_3.png",
+    "image5": r"C:\Users\Administrator\Desktop\kpa work\output_0_4.png",
+    "image6": r"C:\Users\Administrator\Desktop\kpa work\output_0_5.png",
+    "image7": r"C:\Users\Administrator\Desktop\kpa work\output_0_6.png",
+    "image8": r"C:\Users\Administrator\Desktop\kpa work\output_0_7.png",
+    "image9": r"C:\Users\Administrator\Desktop\kpa work\output_0_8.png",
+    "image10": r"C:\Users\Administrator\Desktop\kpa work\output_0_9.png"
 }
 
 # --- Styling ---
