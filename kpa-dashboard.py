@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import datetime
-import matplotlib.pyplot as plt
 from PIL import Image
 import os
 
@@ -15,21 +14,18 @@ st.set_page_config(
 )
 
 # --- Image Path Configuration ---
-# =================================================================
-# REPLACE THESE PATHS WITH YOUR ACTUAL IMAGE FILE LOCATIONS
 IMAGE_PATHS = {
     "image1": r"C:\Users\Administrator\Desktop\kpa work\output_0_0.png",  # distribution of stakeholders by nationality.
     "image2": r"C:\Users\Administrator\Desktop\kpa work\output_0_1.png",  # gender distribution by stakeholders.
     "image3": r"C:\Users\Administrator\Desktop\kpa work\output_0_2.png",  # years of experience distribution.
     "image4": r"C:\Users\Administrator\Desktop\kpa work\output_0_3.png",  # visit frequency distirbution.
-    "image5": r"C:\Users\Administrator\Desktop\kpa work\output_0_4.png",  #  average awaiting time distribution.
+    "image5": r"C:\Users\Administrator\Desktop\kpa work\output_0_4.png",  # average awaiting time distribution.
     "image6": r"C:\Users\Administrator\Desktop\kpa work\output_0_5.png",  # traffic congestion frequency.
     "image7": r"C:\Users\Administrator\Desktop\kpa work\output_0_6.png",  # gate usage distribution.
     "image8": r"C:\Users\Administrator\Desktop\kpa work\output_0_7.png",  # cargo type distribution.
     "image9": r"C:\Users\Administrator\Desktop\kpa work\output_0_8.png",  # time of the day distribution.
-    "image10":r"C:\Users\Administrator\Desktop\kpa work\output_0_9.png"   # common issues faced by stakeholders.
+    "image10": r"C:\Users\Administrator\Desktop\kpa work\output_0_9.png"   # common issues faced by stakeholders.
 }
-# =================================================================
 
 # --- Styling ---
 st.markdown("""
@@ -47,12 +43,6 @@ st.markdown("""
         border-left: 4px solid #0d6efd;
         padding: 15px;
         border-radius: 5px;
-    }
-    .image-container {
-        margin: 20px 0;
-        border: 1px solid #eee;
-        border-radius: 8px;
-        padding: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -91,8 +81,10 @@ def display_image(img_key, caption, col=None):
         else:
             st.image(placeholder, caption=f"Placeholder: {caption} | Error: {str(e)}", use_column_width=True)
 
-# --- Header Section ---
+# --- Dashboard Layout ---
 st.title("🚢 KPA Stakeholder Traffic Analytics Dashboard")
+
+# --- Header Section ---
 st.markdown("""
 <div class="card">
 <h3 class="header">General Objectives</h3>
@@ -108,37 +100,13 @@ st.markdown("""
 # --- Key Metrics ---
 cols = st.columns(4)
 with cols[0]:
-    st.markdown(f"""
-    <div class="metric-card">
-        <h3>Avg Daily Vehicles</h3>
-        <h1>{int(df['vehicle_count'].mean()):,}</h1>
-        <p>5% above target</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.metric("Avg Daily Vehicles", f"{int(df['vehicle_count'].mean()):,}", "5% above target")
 with cols[1]:
-    st.markdown(f"""
-    <div class="metric-card">
-        <h3>Avg Wait Time</h3>
-        <h1>{int(df['wait_time_minutes'].mean())} mins</h1>
-        <p>12% longer than benchmark</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.metric("Avg Wait Time", f"{int(df['wait_time_minutes'].mean())} mins", "12% longer than benchmark")
 with cols[2]:
-    st.markdown("""
-    <div class="metric-card">
-        <h3>Peak Hour Congestion</h3>
-        <h1>60%</h1>
-        <p>10AM-2PM daily</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.metric("Peak Hour Congestion", "60%", "10AM-2PM daily")
 with cols[3]:
-    st.markdown("""
-    <div class="metric-card">
-        <h3>Gate 12 Load</h3>
-        <h1>35%</h1>
-        <p>Primary bottleneck</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.metric("Gate 12 Load", "35%", "Primary bottleneck")
 
 # --- Tabs ---
 tab1, tab2, tab3, tab4 = st.tabs([
@@ -152,153 +120,118 @@ tab1, tab2, tab3, tab4 = st.tabs([
 with tab1:
     st.header("Traffic Volume and Pattern Assessment")
     
-    # Row 1: Charts
+    # Row 1
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader("Vehicle Count Trend")
+        st.subheader("Vehicle Count Over Time")
         st.line_chart(df.groupby("date")["vehicle_count"].sum())
     with col2:
-        st.subheader("Gate Utilization")
-        gate_data = df["gate"].value_counts(normalize=True) * 100
-        st.bar_chart(gate_data)
+        st.subheader("Image 1: Stakeholder Nationality")
+        display_image("image1", "Distribution of stakeholders by nationality")
     
-    # Row 2: Image 1
-    st.subheader("Traffic Flow Analysis")
-    display_image("image1", "distribution of stakeholders by nationality")
-    
-    # Row 3: Image 2 and Hourly Chart
+    # Row 2
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader("Gate Congestion Heatmap")
-        display_image("image2", "gender distribution by stakeholders")
+        st.subheader("Gate Utilization (%)")
+        gate_counts = df["gate"].value_counts(normalize=True) * 100
+        st.bar_chart(gate_counts)
     with col2:
-        st.subheader("Hourly Traffic Distribution")
-        hour_data = df["hour"].value_counts().sort_index()
-        st.bar_chart(hour_data)
+        st.subheader("Image 2: Gender Distribution")
+        display_image("image2", "Gender distribution by stakeholders")
     
-    # Row 4: Image 3
-    st.subheader("Peak Hour Patterns")
-    display_image("image3", "years of experience distribution")
+    # Row 3
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Hourly Traffic Distribution")
+        hour_counts = df["hour"].value_counts().sort_index()
+        st.bar_chart(hour_counts)
+    with col2:
+        st.subheader("Image 3: Experience Levels")
+        display_image("image3", "Years of experience distribution")
 
 # --- Tab 2: Congestion Analysis ---
 with tab2:
     st.header("Congestion Cause Identification")
     
-    # Row 1: Charts
+    # Row 1
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader("Delay Causes")
-        issue_data = df["issue_type"].value_counts(normalize=True) * 100
-        st.bar_chart(issue_data)
+        st.subheader("Delay Causes Distribution")
+        issue_dist = df["issue_type"].value_counts(normalize=True) * 100
+        st.bar_chart(issue_dist)
     with col2:
-        st.subheader("Wait Time Distribution")
-        fig, ax = plt.subplots()
-        ax.hist(df["wait_time_minutes"], bins=30, color="#0d6efd", edgecolor="white")
-        ax.set_xlabel("Wait Time (minutes)")
-        ax.set_ylabel("Frequency")
-        st.pyplot(fig)
+        st.subheader("Image 4: Visit Frequency")
+        display_image("image4", "Visit frequency distribution")
     
-    # Row 2: Image 4
-    st.subheader("Congestion Hotspots")
-    display_image("image4", "visit frequency distirbution")
-    
-    # Row 3: Image 5 and 6
+    # Row 2
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader("Delay Cause Breakdown")
-        display_image("image5", " average awaiting time distribution")
+        st.subheader("Wait Time Ranges")
+        bins = [0, 30, 60, 120, 240, 360]
+        wait_ranges = pd.cut(df["wait_time_minutes"], bins=bins).value_counts().sort_index()
+        st.bar_chart(wait_ranges)
     with col2:
-        st.subheader("Process Bottlenecks")
-        display_image("image6", "traffic congestion frequency")
+        st.subheader("Image 5: Awaiting Time")
+        display_image("image5", "Average awaiting time distribution")
+    
+    # Row 3
+    st.subheader("Image 6: Traffic Congestion")
+    display_image("image6", "Traffic congestion frequency")
 
 # --- Tab 3: Operational Efficiency ---
 with tab3:
     st.header("Operational Efficiency Evaluation")
     
-    # Row 1: Image 7
-    st.subheader("Department Performance Metrics")
-    display_image("image7", "gate usage distribution")
-    
-    # Row 2: Charts
+    # Row 1
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Processing Time by Department")
-        dept_data = df.groupby("department")["wait_time_minutes"].mean()
-        st.bar_chart(dept_data)
+        dept_means = df.groupby("department")["wait_time_minutes"].mean()
+        st.bar_chart(dept_means)
     with col2:
-        st.subheader("Resource Allocation")
-        fig, ax = plt.subplots()
-        df["department"].value_counts().plot(kind="pie", autopct="%1.1f%%", ax=ax)
-        st.pyplot(fig)
+        st.subheader("Image 7: Gate Usage")
+        display_image("image7", "Gate usage distribution")
     
-    # Row 3: Image 8
-    st.subheader("Optimization Potential")
-    display_image("image8", "cargo type distribution.")
+    # Row 2
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Department Workload")
+        dept_counts = df["department"].value_counts()
+        st.bar_chart(dept_counts)
+    with col2:
+        st.subheader("Image 8: Cargo Types")
+        display_image("image8", "Cargo type distribution")
+    
+    # Row 3
+    st.subheader("Image 9: Time of Day")
+    display_image("image9", "Time of the day distribution")
 
 # --- Tab 4: Policy Recommendations ---
 with tab4:
     st.header("Strategic Policy Implementation")
     
+    # Row 1
+    st.subheader("Image 10: Common Issues")
+    display_image("image10", "Common issues faced by stakeholders")
+    
+    # Row 2
     st.subheader("Implementation Roadmap")
     st.markdown("""
-    ```mermaid
-    gantt
-        title KPA Improvement Timeline
-        dateFormat  YYYY-MM-DD
-        section Immediate (0-3mo)
-        ETAS Implementation       :active, 2023-01-01, 90d
-        Temp Holding Areas        :2023-01-15, 75d
-        
-        section Medium-Term (3-12mo)
-        Digital Clearance        :2023-04-01, 180d
-        Single-Window System     :2023-06-01, 150d
-        
-        section Long-Term (1-3yrs)
-        Automated Inspection    :2024-01-01, 365d
-        Cargo Lane Expansion    :2024-06-01, 540d
-    ```
+    - **Immediate (0-3 months):**
+        - Implement Electronic Truck Appointment System (ETAS)
+        - Create temporary truck holding areas
+    - **Medium-Term (3-12 months):**
+        - Digitize 100% of documentation
+        - Implement single-window clearance
+    - **Long-Term (1-3 years):**
+        - Build dedicated cargo lanes
+        - Automate inspection processes
     """)
-    
-    cols = st.columns(3)
-    with cols[0]:
-        st.markdown("""
-        <div class="card">
-        <h4>🔄 Process Changes</h4>
-        <ul>
-            <li>Digitize documentation</li>
-            <li>Implement RFID tracking</li>
-            <li>Automate inspections</li>
-        </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    with cols[1]:
-        st.markdown("""
-        <div class="card">
-        <h4>🏗️ Infrastructure</h4>
-        <ul>
-            <li>Expand Gate 24 capacity</li>
-            <li>Build inland depots</li>
-            <li>Smart traffic systems</li>
-        </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    with cols[2]:
-        st.markdown("""
-        <div class="card">
-        <h4>📊 Performance Targets</h4>
-        <ul>
-            <li>50% faster processing</li>
-            <li>30% higher throughput</li>
-            <li>24/7 operations</li>
-        </ul>
-        </div>
-        """, unsafe_allow_html=True)
 
 # --- Footer ---
 st.markdown("---")
 st.markdown(f"""
 <div style="text-align: center; color: #6c757d;">
     <p>KPA Operational Analytics • Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
-    <p>Data Source: Port Authority Terminal Systems | v2.1.0</p>
 </div>
 """, unsafe_allow_html=True)
