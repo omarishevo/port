@@ -17,18 +17,6 @@ st.markdown("""
     .main {
         background-color: #f8f9fa;
     }
-    .st-bb {
-        background-color: white;
-    }
-    .st-at {
-        background-color: #0d6efd;
-    }
-    .reportview-container .main .block-container {
-        padding-top: 2rem;
-        padding-right: 2rem;
-        padding-left: 2rem;
-        padding-bottom: 2rem;
-    }
     .header {
         color: #0d6efd;
     }
@@ -56,7 +44,6 @@ def load_data():
         "department": np.random.choice(["Operations", "Security", "Logistics", "Customs"], len(dates))
     })
 
-    # Simulate 'hour' column for congestion analysis
     traffic_data['hour'] = np.random.choice(range(6, 21), len(dates))
     return traffic_data
 
@@ -82,7 +69,7 @@ with col3:
 with col4:
     st.metric("Gate 12 Utilization", "35%", "10% ▲")
 
-# Main Content
+# Tabs
 tab1, tab2, tab3, tab4 = st.tabs(["Traffic Patterns", "Congestion Analysis", "Operational Efficiency", "Policy Recommendations"])
 
 with tab1:
@@ -100,7 +87,7 @@ with tab1:
         gate_dist['Percentage'] = (gate_dist['Count'] / gate_dist['Count'].sum() * 100).round(1)
         st.dataframe(gate_dist[['Gate', 'Percentage']].set_index('Gate'))
         st.bar_chart(gate_dist.set_index('Gate')['Count'])
-    
+
     st.markdown("""
     <div class="card">
         <h4>Key Observations:</h4>
@@ -126,7 +113,7 @@ with tab2:
         wait_stats = df.groupby('gate')['wait_time_minutes'].agg(['mean', 'median', 'std']).reset_index()
         st.dataframe(wait_stats.style.format({'mean': '{:.1f}', 'median': '{:.1f}', 'std': '{:.1f}'}))
 
-    # Root Cause Calculations
+    # Calculations
     clearance_pct = df['issue_type'].value_counts(normalize=True).get("Clearance Delays", 0) * 100
     gate12_wait = df[df["gate"] == "Gate 12"]["wait_time_minutes"].mean()
     other_gates_wait = df[df["gate"] != "Gate 12"]["wait_time_minutes"].mean()
@@ -157,7 +144,7 @@ with tab3:
         cargo_wait = df.groupby('cargo_type')['wait_time_minutes'].mean()
         st.bar_chart(cargo_wait)
 
-    # Efficiency Insights Calculations
+    # Efficiency Findings
     container_wait = df[df["cargo_type"] == "Containerized"]["wait_time_minutes"].mean()
     bulk_wait = df[df["cargo_type"] == "Bulk"]["wait_time_minutes"].mean()
     customs_wait = df[df["department"] == "Customs"]["wait_time_minutes"].sum()
@@ -178,41 +165,26 @@ with tab3:
 with tab4:
     st.header("Policy Recommendations")
 
-    with st.container():
-        st.markdown("""
-        <div class="card">
-            <h4>Immediate Actions (0–3 months):</h4>
-            <ol>
-                <li>Implement Electronic Truck Appointment System (ETAS)</li>
-                <li>Reallocate staff during peak hours (10AM–2PM)</li>
-                <li>Launch pilot RFID clearance for frequent shippers</li>
-            </ol>
-        </div>
-        """, unsafe_allow_html=True)
+    st.subheader("Immediate Actions (0–3 months)")
+    st.markdown("""
+- ✅ Implement **Electronic Truck Appointment System (ETAS)**
+- 👥 Reallocate staff during **peak hours (10AM–2PM)**
+- 🚛 Launch pilot **RFID clearance** for frequent shippers
+    """)
 
-    with st.container():
-        st.markdown("""
-        <div class="card">
-            <h4>Medium-Term Solutions (3–12 months):</h4>
-            <ol>
-                <li>Digitize 100% of documentation processes</li>
-                <li>Expand Gate 24 capacity to handle 25% of total traffic</li>
-                <li>Implement unified customs-security clearance platform</li>
-            </ol>
-        </div>
-        """, unsafe_allow_html=True)
+    st.subheader("Medium-Term Solutions (3–12 months)")
+    st.markdown("""
+- 🧾 **Digitize 100%** of documentation processes
+- 🏗️ Expand **Gate 24** capacity to handle 25% of total traffic
+- 🔐 Implement **unified customs-security clearance** platform
+    """)
 
-    with st.container():
-        st.markdown("""
-        <div class="card">
-            <h4>Long-Term Infrastructure (1–3 years):</h4>
-            <ol>
-                <li>Build inland clearance depots to reduce port congestion</li>
-                <li>Automate 80% of inspection processes with AI/ML</li>
-                <li>Develop dedicated cargo corridors with smart traffic control</li>
-            </ol>
-        </div>
-        """, unsafe_allow_html=True)
+    st.subheader("Long-Term Infrastructure (1–3 years)")
+    st.markdown("""
+- 🏭 Build **inland clearance depots** to reduce port congestion
+- 🤖 Automate **80% of inspection processes** with AI/ML
+- 🚦 Develop **dedicated cargo corridors** with smart traffic control
+    """)
 
 # Footer
 st.markdown("---")
