@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 from PIL import Image
+import os
 
 # --- Page Config ---
 st.set_page_config(
@@ -12,18 +13,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- Image Path Configuration ---
+# --- Image Path Configuration (Relative for deployment) ---
 IMAGE_PATHS = {
-    "image1": r"C:\Users\Administrator\Desktop\kpa work\output_0_0.png",
-    "image2": r"C:\Users\Administrator\Desktop\kpa work\output_0_1.png",
-    "image3": r"C:\Users\Administrator\Desktop\kpa work\output_0_2.png",
-    "image4": r"C:\Users\Administrator\Desktop\kpa work\output_0_3.png",
-    "image5": r"C:\Users\Administrator\Desktop\kpa work\output_0_4.png",
-    "image6": r"C:\Users\Administrator\Desktop\kpa work\output_0_5.png",
-    "image7": r"C:\Users\Administrator\Desktop\kpa work\output_0_6.png",
-    "image8": r"C:\Users\Administrator\Desktop\kpa work\output_0_7.png",
-    "image9": r"C:\Users\Administrator\Desktop\kpa work\output_0_8.png",
-    "image10": r"C:\Users\Administrator\Desktop\kpa work\output_0_9.png"
+    f"image{i+1}": os.path.join("images", f"output_0_{i}.png")
+    for i in range(10)
 }
 
 # --- Styling ---
@@ -69,9 +62,9 @@ def display_image(img_key, caption, col=None):
         placeholder = f"https://via.placeholder.com/800x400?text=Missing+{img_key}"
         if col:
             with col:
-                st.image(placeholder, caption=f"Placeholder: {caption} | Error: {str(e)}", use_container_width=True)
+                st.image(placeholder, caption=f"Missing: {caption}", use_container_width=True)
         else:
-            st.image(placeholder, caption=f"Placeholder: {caption} | Error: {str(e)}", use_container_width=True)
+            st.image(placeholder, caption=f"Missing: {caption}", use_container_width=True)
 
 # --- Dashboard Layout ---
 st.title("🚢 KPA Stakeholder Traffic Analytics Dashboard")
@@ -98,7 +91,7 @@ with cols[1]:
 with cols[2]:
     st.metric("Peak Hour Congestion", "60%", "10AM–2PM daily")
 with cols[3]:
-    st.metric("Gate 24 Load", "35%", "Primary bottleneck")
+    st.metric("Gate 12 Load", "35%", "Primary bottleneck")
 
 # --- Tabs ---
 tab1, tab2, tab3, tab4 = st.tabs([
