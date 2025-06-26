@@ -95,7 +95,7 @@ with tab1:
         gate_dist = df['gate'].value_counts().reset_index()
         gate_dist.columns = ['Gate', 'Count']
         gate_dist['Percentage'] = (gate_dist['Count'] / gate_dist['Count'].sum() * 100).round(1)
-        st.dataframe(gate_dist[['Gate', 'Percentage']].set_index('Gate'), height=300)
+        st.dataframe(gate_dist[['Gate', 'Percentage']].set_index('Gate'))
         st.bar_chart(gate_dist.set_index('Gate')['Count'])
     
     st.markdown("""
