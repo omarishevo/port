@@ -15,16 +15,16 @@ st.set_page_config(
 
 # --- Image Path Configuration ---
 IMAGE_PATHS = {
-    "image1": r"C:\Users\Administrator\Desktop\kpa work\output_0_0.png",  # distribution of stakeholders by nationality.
-    "image2": r"C:\Users\Administrator\Desktop\kpa work\output_0_1.png",  # gender distribution by stakeholders.
-    "image3": r"C:\Users\Administrator\Desktop\kpa work\output_0_2.png",  # years of experience distribution.
-    "image4": r"C:\Users\Administrator\Desktop\kpa work\output_0_3.png",  # visit frequency distirbution.
-    "image5": r"C:\Users\Administrator\Desktop\kpa work\output_0_4.png",  # average awaiting time distribution.
-    "image6": r"C:\Users\Administrator\Desktop\kpa work\output_0_5.png",  # traffic congestion frequency.
-    "image7": r"C:\Users\Administrator\Desktop\kpa work\output_0_6.png",  # gate usage distribution.
-    "image8": r"C:\Users\Administrator\Desktop\kpa work\output_0_7.png",  # cargo type distribution.
-    "image9": r"C:\Users\Administrator\Desktop\kpa work\output_0_8.png",  # time of the day distribution.
-    "image10": r"C:\Users\Administrator\Desktop\kpa work\output_0_9.png"   # common issues faced by stakeholders.
+    "image1": r"C:\Users\Administrator\Desktop\kpa work\output_0_0.png",
+    "image2": r"C:\Users\Administrator\Desktop\kpa work\output_0_1.png",
+    "image3": r"C:\Users\Administrator\Desktop\kpa work\output_0_2.png",
+    "image4": r"C:\Users\Administrator\Desktop\kpa work\output_0_3.png",
+    "image5": r"C:\Users\Administrator\Desktop\kpa work\output_0_4.png",
+    "image6": r"C:\Users\Administrator\Desktop\kpa work\output_0_5.png",
+    "image7": r"C:\Users\Administrator\Desktop\kpa work\output_0_6.png",
+    "image8": r"C:\Users\Administrator\Desktop\kpa work\output_0_7.png",
+    "image9": r"C:\Users\Administrator\Desktop\kpa work\output_0_8.png",
+    "image10": r"C:\Users\Administrator\Desktop\kpa work\output_0_9.png"
 }
 
 # --- Styling ---
@@ -65,7 +65,6 @@ df = load_data()
 
 # --- Image Display Function ---
 def display_image(img_key, caption, col=None):
-    """Displays image with error handling"""
     try:
         img = Image.open(IMAGE_PATHS[img_key])
         if col:
@@ -104,7 +103,7 @@ with cols[0]:
 with cols[1]:
     st.metric("Avg Wait Time", f"{int(df['wait_time_minutes'].mean())} mins", "12% longer than benchmark")
 with cols[2]:
-    st.metric("Peak Hour Congestion", "60%", "10AM-2PM daily")
+    st.metric("Peak Hour Congestion", "60%", "10AM–2PM daily")
 with cols[3]:
     st.metric("Gate 12 Load", "35%", "Primary bottleneck")
 
@@ -119,8 +118,6 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # --- Tab 1: Traffic Patterns ---
 with tab1:
     st.header("Traffic Volume and Pattern Assessment")
-    
-    # Row 1
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Vehicle Count Over Time")
@@ -128,8 +125,7 @@ with tab1:
     with col2:
         st.subheader("Image 1: Stakeholder Nationality")
         display_image("image1", "Distribution of stakeholders by nationality")
-    
-    # Row 2
+
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Gate Utilization (%)")
@@ -138,8 +134,7 @@ with tab1:
     with col2:
         st.subheader("Image 2: Gender Distribution")
         display_image("image2", "Gender distribution by stakeholders")
-    
-    # Row 3
+
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Hourly Traffic Distribution")
@@ -152,8 +147,6 @@ with tab1:
 # --- Tab 2: Congestion Analysis ---
 with tab2:
     st.header("Congestion Cause Identification")
-    
-    # Row 1
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Delay Causes Distribution")
@@ -162,27 +155,29 @@ with tab2:
     with col2:
         st.subheader("Image 4: Visit Frequency")
         display_image("image4", "Visit frequency distribution")
-    
-    # Row 2
+
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Wait Time Ranges")
         bins = [0, 30, 60, 120, 240, 360]
-        wait_ranges = pd.cut(df["wait_time_minutes"], bins=bins).value_counts().sort_index()
-        st.bar_chart(wait_ranges)
+        labels = ["0–30", "31–60", "61–120", "121–240", "241–360"]
+        wait_ranges = pd.cut(df["wait_time_minutes"], bins=bins, labels=labels, include_lowest=True)
+        wait_range_counts = wait_ranges.value_counts().sort_index()
+        wait_range_df = pd.DataFrame({
+            "Wait Time Range (mins)": wait_range_counts.index.astype(str),
+            "Count": wait_range_counts.values
+        })
+        st.bar_chart(wait_range_df.set_index("Wait Time Range (mins)"))
     with col2:
         st.subheader("Image 5: Awaiting Time")
         display_image("image5", "Average awaiting time distribution")
-    
-    # Row 3
+
     st.subheader("Image 6: Traffic Congestion")
     display_image("image6", "Traffic congestion frequency")
 
 # --- Tab 3: Operational Efficiency ---
 with tab3:
     st.header("Operational Efficiency Evaluation")
-    
-    # Row 1
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Processing Time by Department")
@@ -191,8 +186,7 @@ with tab3:
     with col2:
         st.subheader("Image 7: Gate Usage")
         display_image("image7", "Gate usage distribution")
-    
-    # Row 2
+
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Department Workload")
@@ -201,29 +195,25 @@ with tab3:
     with col2:
         st.subheader("Image 8: Cargo Types")
         display_image("image8", "Cargo type distribution")
-    
-    # Row 3
+
     st.subheader("Image 9: Time of Day")
     display_image("image9", "Time of the day distribution")
 
 # --- Tab 4: Policy Recommendations ---
 with tab4:
     st.header("Strategic Policy Implementation")
-    
-    # Row 1
     st.subheader("Image 10: Common Issues")
     display_image("image10", "Common issues faced by stakeholders")
-    
-    # Row 2
+
     st.subheader("Implementation Roadmap")
     st.markdown("""
-    - **Immediate (0-3 months):**
+    - **Immediate (0–3 months):**
         - Implement Electronic Truck Appointment System (ETAS)
         - Create temporary truck holding areas
-    - **Medium-Term (3-12 months):**
+    - **Medium-Term (3–12 months):**
         - Digitize 100% of documentation
         - Implement single-window clearance
-    - **Long-Term (1-3 years):**
+    - **Long-Term (1–3 years):**
         - Build dedicated cargo lanes
         - Automate inspection processes
     """)
