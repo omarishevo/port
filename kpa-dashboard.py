@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from datetime import datetime
-
 # Page configuration
 st.set_page_config(
     page_title="KPA Traffic Analytics Dashboard",
