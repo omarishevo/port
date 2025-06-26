@@ -126,7 +126,7 @@ with tab2:
         wait_stats = df.groupby('gate')['wait_time_minutes'].agg(['mean', 'median', 'std']).reset_index()
         st.dataframe(wait_stats.style.format({'mean': '{:.1f}', 'median': '{:.1f}', 'std': '{:.1f}'}))
 
-    # --- Root Cause Calculations ---
+    # Root Cause Calculations
     clearance_pct = df['issue_type'].value_counts(normalize=True).get("Clearance Delays", 0) * 100
     gate12_wait = df[df["gate"] == "Gate 12"]["wait_time_minutes"].mean()
     other_gates_wait = df[df["gate"] != "Gate 12"]["wait_time_minutes"].mean()
@@ -157,7 +157,7 @@ with tab3:
         cargo_wait = df.groupby('cargo_type')['wait_time_minutes'].mean()
         st.bar_chart(cargo_wait)
 
-    # --- Efficiency Insights Calculations ---
+    # Efficiency Insights Calculations
     container_wait = df[df["cargo_type"] == "Containerized"]["wait_time_minutes"].mean()
     bulk_wait = df[df["cargo_type"] == "Bulk"]["wait_time_minutes"].mean()
     customs_wait = df[df["department"] == "Customs"]["wait_time_minutes"].sum()
@@ -177,39 +177,42 @@ with tab3:
 
 with tab4:
     st.header("Policy Recommendations")
-    
-    st.markdown("""
-    <div class="card">
-        <h4>Immediate Actions (0-3 months):</h4>
-        <ol>
-            <li>Implement Electronic Truck Appointment System (ETAS)</li>
-            <li>Reallocate staff during peak hours (10AM-2PM)</li>
-            <li>Launch pilot RFID clearance for frequent shippers</li>
-        </ol>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="card">
-        <h4>Medium-Term Solutions (3-12 months):</h4>
-        <ol>
-            <li>Digitize 100% of documentation processes</li>
-            <li>Expand Gate 24 capacity to handle 25% of total traffic</li>
-            <li>Implement unified customs-security clearance platform</li>
-        </ol>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="card">
-        <h4>Long-Term Infrastructure (1-3 years):</h4>
-        <ol>
-            <li>Build inland clearance depots to reduce port congestion</li>
-            <li>Automate 80% of inspection processes with AI/ML</li>
-            <li>Develop dedicated cargo corridors with smart traffic control</li>
-        </ol>
-    </div>
-    """, unsafe_allow_html=True)
+
+    with st.container():
+        st.markdown("""
+        <div class="card">
+            <h4>Immediate Actions (0–3 months):</h4>
+            <ol>
+                <li>Implement Electronic Truck Appointment System (ETAS)</li>
+                <li>Reallocate staff during peak hours (10AM–2PM)</li>
+                <li>Launch pilot RFID clearance for frequent shippers</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with st.container():
+        st.markdown("""
+        <div class="card">
+            <h4>Medium-Term Solutions (3–12 months):</h4>
+            <ol>
+                <li>Digitize 100% of documentation processes</li>
+                <li>Expand Gate 24 capacity to handle 25% of total traffic</li>
+                <li>Implement unified customs-security clearance platform</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with st.container():
+        st.markdown("""
+        <div class="card">
+            <h4>Long-Term Infrastructure (1–3 years):</h4>
+            <ol>
+                <li>Build inland clearance depots to reduce port congestion</li>
+                <li>Automate 80% of inspection processes with AI/ML</li>
+                <li>Develop dedicated cargo corridors with smart traffic control</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
 
 # Footer
 st.markdown("---")
