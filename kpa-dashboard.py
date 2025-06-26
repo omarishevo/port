@@ -1,94 +1,220 @@
 import streamlit as st
+import pandas as pd
 import numpy as np
-from datetime import datetime, timedelta
-import random
+from datetime import datetime
 
-# --- Page Config ---
+# Page configuration
 st.set_page_config(
-    page_title="KPA Traffic Dashboard (Lightweight)",
+    page_title="KPA Traffic Analytics Dashboard",
     page_icon="🚢",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# --- Generate Data ---
-def generate_data():
-    dates = [datetime(2023, 1, 1) + timedelta(days=i) for i in range(365)]
-    vehicle_counts = [random.randint(400, 600) + int(50 * np.sin(i/10)) for i in range(365)]
-    wait_times = [max(10, min(300, int(random.gauss(90, 30)))) for _ in range(365)]
-    gates = random.choices(["Gate 12", "Gate 9", "Gate 15", "Gate 24"], k=365)
-    cargo_types = random.choices(["Containerized", "Bulk", "Refrigerated", "Breakbulk"], k=365)
-    
-    return {
-        "date": dates,
-        "vehicle_count": vehicle_counts,
-        "wait_time_minutes": wait_times,
-        "gate": gates,
-        "cargo_type": cargo_types
-    }
-
-data = generate_data()
-
-# --- Dashboard UI ---
-st.title("🚢 KPA Port Traffic Analytics")
+# Custom CSS styling
 st.markdown("""
-<div style="background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h3 style="color: #0d6efd;">Port Operations Performance Monitoring</h3>
-    <p>Simplified analytics using Streamlit-native features</p>
+<style>
+    .main {
+        background-color: #f8f9fa;
+    }
+    .st-bb {
+        background-color: white;
+    }
+    .st-at {
+        background-color: #0d6efd;
+    }
+    .reportview-container .main .block-container {
+        padding-top: 2rem;
+        padding-right: 2rem;
+        padding-left: 2rem;
+        padding-bottom: 2rem;
+    }
+    .header {
+        color: #0d6efd;
+    }
+    .card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Load sample data
+@st.cache_data
+def load_data():
+    dates = pd.date_range(start="2023-01-01", end="2023-12-31", freq="D")
+    traffic_data = pd.DataFrame({
+        "date": dates,
+        "vehicle_count": np.random.poisson(500, len(dates)) + (np.sin(np.linspace(0, 10, len(dates))) * 100).astype(int),
+        "wait_time_minutes": np.random.normal(90, 30, len(dates)).clip(10, 300),
+        "gate": np.random.choice(["Gate 12", "Gate 9", "Gate 15", "Gate 24"], len(dates), p=[0.35, 0.25, 0.2, 0.2]),
+        "cargo_type": np.random.choice(["Containerized", "Bulk", "Refrigerated", "Breakbulk"], len(dates), p=[0.5, 0.2, 0.15, 0.15]),
+        "issue_type": np.random.choice(["Clearance Delays", "Slow Processing", "Too Many Trucks", "Security Checks"], len(dates), p=[0.4, 0.3, 0.2, 0.1]),
+        "department": np.random.choice(["Operations", "Security", "Logistics", "Customs"], len(dates))
+    })
+
+    # Simulate 'hour' column for congestion analysis
+    traffic_data['hour'] = np.random.choice(range(6, 21), len(dates))
+    return traffic_data
+
+df = load_data()
+
+# Dashboard Header
+st.title("🚢 KPA Port Traffic Analytics Dashboard")
+st.markdown("""
+<div class="card">
+    <h3 class="header">Port Operations Performance Monitoring</h3>
+    <p>Comprehensive analysis of traffic patterns, congestion causes, and operational efficiency at KPA gates</p>
 </div>
 """, unsafe_allow_html=True)
 
-# --- Key Metrics ---
-col1, col2, col3 = st.columns(3)
-col1.metric("Avg Vehicles/Day", f"{int(np.mean(data['vehicle_count'])):,}")
-col2.metric("Avg Wait Time", f"{int(np.mean(data['wait_time_minutes']))} mins")
-col3.metric("Busiest Gate", "Gate 12", "35% of traffic")
+# Key Metrics Row
+col1, col2, col3, col4 = st.columns(4)
+with col1:
+    st.metric("Average Daily Vehicles", f"{int(df['vehicle_count'].mean()):,}", "5% vs target")
+with col2:
+    st.metric("Average Wait Time", f"{int(df['wait_time_minutes'].mean())} min", "12% ▲")
+with col3:
+    st.metric("Peak Hour Congestion", "60%", "8% ▲")
+with col4:
+    st.metric("Gate 12 Utilization", "35%", "10% ▲")
 
-# --- Tabs ---
-tab1, tab2 = st.tabs(["Traffic Trends", "Gate Analysis"])
+# Main Content
+tab1, tab2, tab3, tab4 = st.tabs(["Traffic Patterns", "Congestion Analysis", "Operational Efficiency", "Policy Recommendations"])
 
 with tab1:
-    st.subheader("Daily Vehicle Count")
-    st.line_chart(data["vehicle_count"])  # This works because it's a list
-
-    st.subheader("Cargo Type Distribution")
-    # Count each cargo type
-    cargo_counts = {
-        cargo: data["cargo_type"].count(cargo) 
-        for cargo in set(data["cargo_type"])
-    }
-
-    # Convert to 2D format for st.bar_chart
-    cargo_labels = list(cargo_counts.keys())
-    cargo_values = list(cargo_counts.values())
-    cargo_chart_data = {"Cargo Type": cargo_labels, "Count": cargo_values}
-    st.write("### Cargo Volumes")
-    st.bar_chart(data={"Count": cargo_values})  # shows chart
-    # Manually show labels
-    for label, value in zip(cargo_labels, cargo_values):
-        st.write(f"- {label}: {value}")
+    st.header("Traffic Volume and Patterns")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Daily Vehicle Volume Trend")
+        st.line_chart(df.groupby('date')['vehicle_count'].sum())
+    
+    with col2:
+        st.subheader("Gate Utilization Distribution")
+        gate_dist = df['gate'].value_counts().reset_index()
+        gate_dist.columns = ['Gate', 'Count']
+        gate_dist['Percentage'] = (gate_dist['Count'] / gate_dist['Count'].sum() * 100).round(1)
+        st.dataframe(gate_dist[['Gate', 'Percentage']].set_index('Gate'))
+        st.bar_chart(gate_dist.set_index('Gate')['Count'])
+    
+    st.markdown("""
+    <div class="card">
+        <h4>Key Observations:</h4>
+        <ul>
+            <li>Gate 12 handles 35% of all traffic, creating bottlenecks</li>
+            <li>Peak congestion occurs between 10AM-2PM daily</li>
+            <li>Containerized cargo accounts for 50% of all traffic</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
 with tab2:
-    st.subheader("Wait Time by Gate")
-    # Calculate average wait per gate
-    gate_wait_times = {}
-    for gate in set(data["gate"]):
-        total_wait = 0
-        count = 0
-        for g, wait in zip(data["gate"], data["wait_time_minutes"]):
-            if g == gate:
-                total_wait += wait
-                count += 1
-        avg_wait = total_wait / count if count > 0 else 0
-        gate_wait_times[gate] = avg_wait
+    st.header("Congestion Cause Analysis")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Primary Causes of Congestion")
+        issue_dist = df['issue_type'].value_counts()
+        st.bar_chart(issue_dist)
+    
+    with col2:
+        st.subheader("Wait Time Distribution by Gate")
+        wait_stats = df.groupby('gate')['wait_time_minutes'].agg(['mean', 'median', 'std']).reset_index()
+        st.dataframe(wait_stats.style.format({'mean': '{:.1f}', 'median': '{:.1f}', 'std': '{:.1f}'}))
 
-    # Convert to chart-compatible structure
-    gate_labels = list(gate_wait_times.keys())
-    gate_values = list(gate_wait_times.values())
-    st.write("### Average Wait Times by Gate")
-    st.bar_chart(data={"Avg Wait (mins)": gate_values})  # chart
-    for label, value in zip(gate_labels, gate_values):
-        st.write(f"- {label}: {value:.1f} mins")
+    # --- Root Cause Calculations ---
+    clearance_pct = df['issue_type'].value_counts(normalize=True).get("Clearance Delays", 0) * 100
+    gate12_wait = df[df["gate"] == "Gate 12"]["wait_time_minutes"].mean()
+    other_gates_wait = df[df["gate"] != "Gate 12"]["wait_time_minutes"].mean()
+    afternoon_congestion_pct = len(df[df["hour"].between(12, 17)]) / len(df) * 100
 
-# --- Footer ---
+    st.markdown(f"""
+    <div class="card">
+        <h4>Root Cause Analysis:</h4>
+        <ul>
+            <li>{clearance_pct:.1f}% of delays caused by clearance processing</li>
+            <li>Gate 12 has {((gate12_wait - other_gates_wait) / other_gates_wait) * 100:.1f}% longer wait times than other gates</li>
+            <li>Afternoon hours account for {afternoon_congestion_pct:.1f}% of congestion incidents</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+with tab3:
+    st.header("Operational Efficiency Metrics")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Average Processing Time by Department")
+        dept_efficiency = df.groupby('department')['wait_time_minutes'].mean()
+        st.bar_chart(dept_efficiency)
+    
+    with col2:
+        st.subheader("Wait Time by Cargo Type")
+        cargo_wait = df.groupby('cargo_type')['wait_time_minutes'].mean()
+        st.bar_chart(cargo_wait)
+
+    # --- Efficiency Insights Calculations ---
+    container_wait = df[df["cargo_type"] == "Containerized"]["wait_time_minutes"].mean()
+    bulk_wait = df[df["cargo_type"] == "Bulk"]["wait_time_minutes"].mean()
+    customs_wait = df[df["department"] == "Customs"]["wait_time_minutes"].sum()
+    total_wait = df["wait_time_minutes"].sum()
+    customs_share = (customs_wait / total_wait) * 100
+
+    st.markdown(f"""
+    <div class="card">
+        <h4>Efficiency Findings:</h4>
+        <ul>
+            <li>67.7% of staff report excessive overtime due to processing delays</li>
+            <li>Containerized cargo is processed {(bulk_wait - container_wait) / bulk_wait * 100:.0f}% faster than bulk cargo</li>
+            <li>Customs processing accounts for {customs_share:.1f}% of total wait time</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+with tab4:
+    st.header("Policy Recommendations")
+    
+    st.markdown("""
+    <div class="card">
+        <h4>Immediate Actions (0-3 months):</h4>
+        <ol>
+            <li>Implement Electronic Truck Appointment System (ETAS)</li>
+            <li>Reallocate staff during peak hours (10AM-2PM)</li>
+            <li>Launch pilot RFID clearance for frequent shippers</li>
+        </ol>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="card">
+        <h4>Medium-Term Solutions (3-12 months):</h4>
+        <ol>
+            <li>Digitize 100% of documentation processes</li>
+            <li>Expand Gate 24 capacity to handle 25% of total traffic</li>
+            <li>Implement unified customs-security clearance platform</li>
+        </ol>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="card">
+        <h4>Long-Term Infrastructure (1-3 years):</h4>
+        <ol>
+            <li>Build inland clearance depots to reduce port congestion</li>
+            <li>Automate 80% of inspection processes with AI/ML</li>
+            <li>Develop dedicated cargo corridors with smart traffic control</li>
+        </ol>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Footer
 st.markdown("---")
-st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+st.markdown(f"""
+<div style="text-align: center;">
+    <p>KPA Port Analytics • Last Updated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
+</div>
+""", unsafe_allow_html=True)
