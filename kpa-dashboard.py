@@ -48,39 +48,46 @@ tab1, tab2 = st.tabs(["Traffic Trends", "Gate Analysis"])
 
 with tab1:
     st.subheader("Daily Vehicle Count")
-    st.line_chart(data["vehicle_count"])  # Just list is fine here
+    st.line_chart(data["vehicle_count"])  # This works because it's a list
 
     st.subheader("Cargo Type Distribution")
+    # Count each cargo type
     cargo_counts = {
         cargo: data["cargo_type"].count(cargo) 
         for cargo in set(data["cargo_type"])
     }
 
-    # Convert dict to a list of values (bar_chart takes a list)
-    values = list(cargo_counts.values())
-    st.bar_chart(values)
-
-    # Add manual labels
-    for cargo, count in cargo_counts.items():
-        st.write(f"{cargo}: {count}")
+    # Convert to 2D format for st.bar_chart
+    cargo_labels = list(cargo_counts.keys())
+    cargo_values = list(cargo_counts.values())
+    cargo_chart_data = {"Cargo Type": cargo_labels, "Count": cargo_values}
+    st.write("### Cargo Volumes")
+    st.bar_chart(data={"Count": cargo_values})  # shows chart
+    # Manually show labels
+    for label, value in zip(cargo_labels, cargo_values):
+        st.write(f"- {label}: {value}")
 
 with tab2:
     st.subheader("Wait Time by Gate")
-    gate_wait_times = {
-        gate: np.mean([
-            wait for g, wait in zip(data["gate"], data["wait_time_minutes"]) 
-            if g == gate
-        ])
-        for gate in set(data["gate"])
-    }
+    # Calculate average wait per gate
+    gate_wait_times = {}
+    for gate in set(data["gate"]):
+        total_wait = 0
+        count = 0
+        for g, wait in zip(data["gate"], data["wait_time_minutes"]):
+            if g == gate:
+                total_wait += wait
+                count += 1
+        avg_wait = total_wait / count if count > 0 else 0
+        gate_wait_times[gate] = avg_wait
 
-    # Convert dict to list of values
-    values = list(gate_wait_times.values())
-    st.bar_chart(values)
-
-    # Manual labels
-    for gate, wait in gate_wait_times.items():
-        st.write(f"{gate}: {wait:.1f} mins")
+    # Convert to chart-compatible structure
+    gate_labels = list(gate_wait_times.keys())
+    gate_values = list(gate_wait_times.values())
+    st.write("### Average Wait Times by Gate")
+    st.bar_chart(data={"Avg Wait (mins)": gate_values})  # chart
+    for label, value in zip(gate_labels, gate_values):
+        st.write(f"- {label}: {value:.1f} mins")
 
 # --- Footer ---
 st.markdown("---")
