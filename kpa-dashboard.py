@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from datetime import datetime
+
 # Page configuration
 st.set_page_config(
     page_title="KPA Traffic Analytics Dashboard",
@@ -90,9 +92,11 @@ with tab1:
     
     with col2:
         st.subheader("Gate Utilization Distribution")
-        gate_dist = df['gate'].value_counts()
-        st.dataframe(gate_dist.style.format("{:.1%}", subset=["count"]), height=300)
-        st.bar_chart(gate_dist)
+        gate_dist = df['gate'].value_counts().reset_index()
+        gate_dist.columns = ['Gate', 'Count']
+        gate_dist['Percentage'] = (gate_dist['Count'] / gate_dist['Count'].sum() * 100).round(1)
+        st.dataframe(gate_dist[['Gate', 'Percentage']].set_index('Gate'), height=300)
+        st.bar_chart(gate_dist.set_index('Gate')['Count'])
     
     st.markdown("""
     <div class="card">
@@ -116,8 +120,8 @@ with tab2:
     
     with col2:
         st.subheader("Wait Time Distribution by Gate")
-        wait_stats = df.groupby('gate')['wait_time_minutes'].agg(['mean', 'median', 'std'])
-        st.dataframe(wait_stats.style.format("{:.1f}"))
+        wait_stats = df.groupby('gate')['wait_time_minutes'].agg(['mean', 'median', 'std']).reset_index()
+        st.dataframe(wait_stats.style.format({'mean': '{:.1f}', 'median': '{:.1f}', 'std': '{:.1f}'}))
     
     st.markdown("""
     <div class="card">
