@@ -69,16 +69,16 @@ def display_image(img_key, caption, col=None):
         img = Image.open(IMAGE_PATHS[img_key])
         if col:
             with col:
-                st.image(img, caption=caption, use_column_width=True)
+                st.image(img, caption=caption, use_container_width=True)
         else:
-            st.image(img, caption=caption, use_column_width=True)
+            st.image(img, caption=caption, use_container_width=True)
     except Exception as e:
         placeholder = f"https://via.placeholder.com/800x400?text=Missing+{img_key}"
         if col:
             with col:
-                st.image(placeholder, caption=f"Placeholder: {caption} | Error: {str(e)}", use_column_width=True)
+                st.image(placeholder, caption=f"Placeholder: {caption} | Error: {str(e)}", use_container_width=True)
         else:
-            st.image(placeholder, caption=f"Placeholder: {caption} | Error: {str(e)}", use_column_width=True)
+            st.image(placeholder, caption=f"Placeholder: {caption} | Error: {str(e)}", use_container_width=True)
 
 # --- Dashboard Layout ---
 st.title("🚢 KPA Stakeholder Traffic Analytics Dashboard")
