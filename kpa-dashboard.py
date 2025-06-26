@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import plotly.express as px
-import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 from datetime import datetime
 
 # Page configuration
@@ -44,24 +43,19 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Load sample data (replace with your actual data)
+# Load sample data
 @st.cache_data
 def load_data():
-    # Generate sample data that matches your analysis
     dates = pd.date_range(start="2023-01-01", end="2023-12-31", freq="D")
     traffic_data = pd.DataFrame({
         "date": dates,
-        "vehicle_count": np.random.poisson(500, len(dates)) + np.sin(np.linspace(0, 10, len(dates))) * 100,
+        "vehicle_count": np.random.poisson(500, len(dates)) + (np.sin(np.linspace(0, 10, len(dates))) * 100).astype(int),
         "wait_time_minutes": np.random.normal(90, 30, len(dates)).clip(10, 300),
         "gate": np.random.choice(["Gate 12", "Gate 9", "Gate 15", "Gate 24"], len(dates), p=[0.35, 0.25, 0.2, 0.2]),
         "cargo_type": np.random.choice(["Containerized", "Bulk", "Refrigerated", "Breakbulk"], len(dates), p=[0.5, 0.2, 0.15, 0.15]),
         "issue_type": np.random.choice(["Clearance Delays", "Slow Processing", "Too Many Trucks", "Security Checks"], len(dates), p=[0.4, 0.3, 0.2, 0.1]),
         "department": np.random.choice(["Operations", "Security", "Logistics", "Customs"], len(dates))
     })
-    
-    # Add weekly seasonality
-    traffic_data["vehicle_count"] = traffic_data["vehicle_count"] * (1 + 0.3 * np.sin(2 * np.pi * traffic_data.index.dayofweek / 7))
-    
     return traffic_data
 
 df = load_data()
@@ -94,18 +88,16 @@ with tab1:
     
     col1, col2 = st.columns(2)
     with col1:
-        fig = px.line(df.groupby('date')['vehicle_count'].sum().reset_index(), 
-                     x='date', y='vehicle_count',
-                     title="Daily Vehicle Volume Trend",
-                     labels={'vehicle_count': 'Vehicle Count', 'date': 'Date'})
-        st.plotly_chart(fig, use_container_width=True)
+        st.subheader("Daily Vehicle Volume Trend")
+        st.line_chart(df.groupby('date')['vehicle_count'].sum())
     
     with col2:
-        gate_dist = df['gate'].value_counts().reset_index()
-        fig = px.pie(gate_dist, values='count', names='gate',
-                    title="Gate Utilization Distribution",
-                    hole=0.3)
-        st.plotly_chart(fig, use_container_width=True)
+        st.subheader("Gate Utilization Distribution")
+        gate_dist = df['gate'].value_counts()
+        fig, ax = plt.subplots()
+        ax.pie(gate_dist, labels=gate_dist.index, autopct='%1.1f%%', startangle=90)
+        ax.axis('equal')
+        st.pyplot(fig)
     
     st.markdown("""
     <div class="card">
@@ -123,18 +115,17 @@ with tab2:
     
     col1, col2 = st.columns(2)
     with col1:
-        issue_dist = df['issue_type'].value_counts().reset_index()
-        fig = px.bar(issue_dist, x='count', y='issue_type', 
-                     title="Primary Causes of Congestion",
-                     labels={'count': 'Frequency', 'issue_type': 'Issue Type'},
-                     orientation='h')
-        st.plotly_chart(fig, use_container_width=True)
+        st.subheader("Primary Causes of Congestion")
+        issue_dist = df['issue_type'].value_counts()
+        st.bar_chart(issue_dist)
     
     with col2:
-        fig = px.box(df, x='gate', y='wait_time_minutes',
-                    title="Wait Time Distribution by Gate",
-                    labels={'wait_time_minutes': 'Wait Time (minutes)', 'gate': 'Gate'})
-        st.plotly_chart(fig, use_container_width=True)
+        st.subheader("Wait Time Distribution by Gate")
+        fig, ax = plt.subplots()
+        df.boxplot(column='wait_time_minutes', by='gate', ax=ax)
+        plt.title('')
+        plt.suptitle('')
+        st.pyplot(fig)
     
     st.markdown("""
     <div class="card">
@@ -152,18 +143,14 @@ with tab3:
     
     col1, col2 = st.columns(2)
     with col1:
-        dept_efficiency = df.groupby('department')['wait_time_minutes'].mean().reset_index()
-        fig = px.bar(dept_efficiency, x='department', y='wait_time_minutes',
-                    title="Average Processing Time by Department",
-                    labels={'wait_time_minutes': 'Average Wait (minutes)', 'department': 'Department'})
-        st.plotly_chart(fig, use_container_width=True)
+        st.subheader("Average Processing Time by Department")
+        dept_efficiency = df.groupby('department')['wait_time_minutes'].mean()
+        st.bar_chart(dept_efficiency)
     
     with col2:
-        cargo_wait = df.groupby('cargo_type')['wait_time_minutes'].mean().reset_index()
-        fig = px.bar(cargo_wait, x='cargo_type', y='wait_time_minutes',
-                    title="Wait Time by Cargo Type",
-                    labels={'wait_time_minutes': 'Average Wait (minutes)', 'cargo_type': 'Cargo Type'})
-        st.plotly_chart(fig, use_container_width=True)
+        st.subheader("Wait Time by Cargo Type")
+        cargo_wait = df.groupby('cargo_type')['wait_time_minutes'].mean()
+        st.bar_chart(cargo_wait)
     
     st.markdown("""
     <div class="card">
