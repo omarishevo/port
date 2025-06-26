@@ -98,7 +98,7 @@ with cols[1]:
 with cols[2]:
     st.metric("Peak Hour Congestion", "60%", "10AM–2PM daily")
 with cols[3]:
-    st.metric("Gate 12 Load", "35%", "Primary bottleneck")
+    st.metric("Gate 24 Load", "35%", "Primary bottleneck")
 
 # --- Tabs ---
 tab1, tab2, tab3, tab4 = st.tabs([
