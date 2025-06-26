@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 from datetime import datetime, timedelta
+import random
 
 # --- Page Config ---
 st.set_page_config(
@@ -12,10 +13,10 @@ st.set_page_config(
 # --- Generate Data (No Pandas) ---
 def generate_data():
     dates = [datetime(2023, 1, 1) + timedelta(days=i) for i in range(365)]
-    vehicle_counts = np.random.poisson(500, 365) + (np.sin(np.linspace(0, 10, 365)) * 100).astype(int)
-    wait_times = np.clip(np.random.normal(90, 30, 365), 10, 300)
-    gates = np.random.choice(["Gate 12", "Gate 9", "Gate 15", "Gate 24"], 365)
-    cargo_types = np.random.choice(["Containerized", "Bulk", "Refrigerated", "Breakbulk"], 365)
+    vehicle_counts = [random.randint(400, 600) + int(50 * np.sin(i/10)) for i in range(365)]
+    wait_times = [max(10, min(300, int(random.gauss(90, 30)))) for _ in range(365)]
+    gates = random.choices(["Gate 12", "Gate 9", "Gate 15", "Gate 24"], k=365)
+    cargo_types = random.choices(["Containerized", "Bulk", "Refrigerated", "Breakbulk"], k=365)
     
     return {
         "date": dates,
@@ -50,19 +51,22 @@ with tab1:
     st.line_chart({"Vehicles": data["vehicle_count"]})  # Streamlit built-in
     
     st.subheader("Cargo Type Distribution")
-    cargo_counts = {cargo: list(data["cargo_type"]).count(cargo) for cargo in set(data["cargo_type"])}
+    cargo_counts = {
+        cargo: data["cargo_type"].count(cargo) 
+        for cargo in set(data["cargo_type"])
+    }
     st.bar_chart(cargo_counts)
 
 with tab2:
     st.subheader("Wait Time by Gate")
-    gate_data = {
-        "Gate 12": [t for g, t in zip(data["gate"], data["wait_time_minutes"]) if g == "Gate 12"],
-        "Gate 9": [t for g, t in zip(data["gate"], data["wait_time_minutes"]) if g == "Gate 9"],
+    gate_wait_times = {
+        gate: np.mean([
+            wait for g, wait in zip(data["gate"], data["wait_time_minutes"]) 
+            if g == gate
+        ])
+        for gate in set(data["gate"])
     }
-    st.bar_chart({
-        "Avg Wait Time (Gate 12)": np.mean(gate_data["Gate 12"]),
-        "Avg Wait Time (Gate 9)": np.mean(gate_data["Gate 9"]),
-    })
+    st.bar_chart(gate_wait_times)
 
 # --- Footer ---
 st.markdown("---")
