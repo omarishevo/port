@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
-import base64
+from PIL import Image
+import os
 
 # --- Page Config ---
 st.set_page_config(
@@ -13,7 +14,24 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- Custom Styling ---
+# --- Image Path Configuration ---
+# =================================================================
+# REPLACE THESE PATHS WITH YOUR ACTUAL IMAGE FILE LOCATIONS
+IMAGE_PATHS = {
+    "image1": r"C:\Users\Administrator\Desktop\kpa work\output_0_0.png",  # distribution of stakeholders by nationality.
+    "image2": r"C:\Users\Administrator\Desktop\kpa work\output_0_1.png",  # gender distribution by stakeholders.
+    "image3": r"C:\Users\Administrator\Desktop\kpa work\output_0_2.png",  # years of experience distribution.
+    "image4": r"C:\Users\Administrator\Desktop\kpa work\output_0_3.png",  # visit frequency distirbution.
+    "image5": r"C:\Users\Administrator\Desktop\kpa work\output_0_4.png",  # awaiting time distribution.
+    "image6": r"C:\Users\Administrator\Desktop\kpa work\output_0_5.png",  # traffic congestion frequency.
+    "image7": r"C:\Users\Administrator\Desktop\kpa work\output_0_6.png",  # gate usage distribution.
+    "image8": r"C:\Users\Administrator\Desktop\kpa work\output_0_7.png",  # cargo type distribution.
+    "image9": r"C:\Users\Administrator\Desktop\kpa work\output_0_8.png",  # time of the day distribution.
+    "image10":r"C:\Users\Administrator\Desktop\kpa work\output_0_9.png"   # common issues faced by stakeholders.
+}
+# =================================================================
+
+# --- Styling ---
 st.markdown("""
 <style>
     .header { color: #0d6efd; }
@@ -29,6 +47,12 @@ st.markdown("""
         border-left: 4px solid #0d6efd;
         padding: 15px;
         border-radius: 5px;
+    }
+    .image-container {
+        margin: 20px 0;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -49,14 +73,23 @@ def load_data():
 
 df = load_data()
 
-# --- Image Embedding (Base64) ---
-def get_image_base64(path):
-    with open(path, "rb") as img_file:
-        return base64.b64encode(img_file.read()).decode()
-    
-# (For actual deployment, replace with your image files)
-# image1 = get_image_base64("media/image1.png")
-# image2 = get_image_base64("media/image2.png")
+# --- Image Display Function ---
+def display_image(img_key, caption, col=None):
+    """Displays image with error handling"""
+    try:
+        img = Image.open(IMAGE_PATHS[img_key])
+        if col:
+            with col:
+                st.image(img, caption=caption, use_column_width=True)
+        else:
+            st.image(img, caption=caption, use_column_width=True)
+    except Exception as e:
+        placeholder = f"https://via.placeholder.com/800x400?text=Missing+{img_key}"
+        if col:
+            with col:
+                st.image(placeholder, caption=f"Placeholder: {caption} | Error: {str(e)}", use_column_width=True)
+        else:
+            st.image(placeholder, caption=f"Placeholder: {caption} | Error: {str(e)}", use_column_width=True)
 
 # --- Header Section ---
 st.title("🚢 KPA Stakeholder Traffic Analytics Dashboard")
@@ -117,95 +150,97 @@ tab1, tab2, tab3, tab4 = st.tabs([
 
 # --- Tab 1: Traffic Patterns ---
 with tab1:
-    col1, col2 = st.columns(2)
+    st.header("Traffic Volume and Pattern Assessment")
     
+    # Row 1: Charts
+    col1, col2 = st.columns(2)
     with col1:
         st.subheader("Vehicle Count Trend")
         st.line_chart(df.groupby("date")["vehicle_count"].sum())
-        
-        st.subheader("Hourly Traffic Distribution")
-        fig, ax = plt.subplots(figsize=(10,4))
-        df["hour"].value_counts().sort_index().plot(kind="bar", color="#0d6efd", ax=ax)
-        ax.set_xlabel("Hour of Day")
-        ax.set_ylabel("Vehicle Count")
-        st.pyplot(fig)
-    
     with col2:
         st.subheader("Gate Utilization")
         gate_data = df["gate"].value_counts(normalize=True) * 100
-        fig, ax = plt.subplots(figsize=(10,4))
-        gate_data.plot(kind="bar", color=["#0d6efd", "#6c757d", "#20c997", "#fd7e14"], ax=ax)
-        ax.set_ylabel("Percentage (%)")
-        st.pyplot(fig)
-        
-        # Example image placeholder (replace with actual images)
-        st.image("https://via.placeholder.com/600x300?text=Gate+Congestion+Heatmap", 
-                caption="Gate Congestion Heatmap (Example)")
+        st.bar_chart(gate_data)
+    
+    # Row 2: Image 1
+    st.subheader("Traffic Flow Analysis")
+    display_image("image1", "Traffic Flow Visualization")
+    
+    # Row 3: Image 2 and Hourly Chart
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Gate Congestion Heatmap")
+        display_image("image2", "Gate Utilization Heatmap")
+    with col2:
+        st.subheader("Hourly Traffic Distribution")
+        hour_data = df["hour"].value_counts().sort_index()
+        st.bar_chart(hour_data)
+    
+    # Row 4: Image 3
+    st.subheader("Peak Hour Patterns")
+    display_image("image3", "Hourly Traffic Analysis")
 
 # --- Tab 2: Congestion Analysis ---
 with tab2:
-    col1, col2 = st.columns(2)
+    st.header("Congestion Cause Identification")
     
+    # Row 1: Charts
+    col1, col2 = st.columns(2)
     with col1:
         st.subheader("Delay Causes")
         issue_data = df["issue_type"].value_counts(normalize=True) * 100
-        fig, ax = plt.subplots(figsize=(8,8))
-        issue_data.plot(kind="pie", autopct="%1.1f%%", colors=["#0d6efd", "#6c757d", "#20c997", "#fd7e14"])
-        st.pyplot(fig)
-    
+        st.bar_chart(issue_data)
     with col2:
         st.subheader("Wait Time Distribution")
-        fig, ax = plt.subplots(figsize=(10,5))
+        fig, ax = plt.subplots()
         ax.hist(df["wait_time_minutes"], bins=30, color="#0d6efd", edgecolor="white")
-        ax.axvline(df["wait_time_minutes"].mean(), color="red", linestyle="--", label="Average")
         ax.set_xlabel("Wait Time (minutes)")
         ax.set_ylabel("Frequency")
-        ax.legend()
         st.pyplot(fig)
-        
-        # Example process flow image
-        st.image("https://via.placeholder.com/600x200?text=Clearance+Process+Flow", 
-                caption="Current Clearance Process (Example)")
+    
+    # Row 2: Image 4
+    st.subheader("Congestion Hotspots")
+    display_image("image4", "Congestion Hotspot Map")
+    
+    # Row 3: Image 5 and 6
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Delay Cause Breakdown")
+        display_image("image5", "Root Cause Analysis")
+    with col2:
+        st.subheader("Process Bottlenecks")
+        display_image("image6", "Clearance Process Flow")
 
 # --- Tab 3: Operational Efficiency ---
 with tab3:
-    st.subheader("Department Performance")
-    col1, col2 = st.columns([2,1])
+    st.header("Operational Efficiency Evaluation")
     
+    # Row 1: Image 7
+    st.subheader("Department Performance Metrics")
+    display_image("image7", "Efficiency Benchmarking")
+    
+    # Row 2: Charts
+    col1, col2 = st.columns(2)
     with col1:
-        dept_data = df.groupby("department")["wait_time_minutes"].mean().sort_values()
-        fig, ax = plt.subplots(figsize=(8,4))
-        dept_data.plot(kind="barh", color="#0d6efd", ax=ax)
-        ax.set_xlabel("Average Wait Time (minutes)")
+        st.subheader("Processing Time by Department")
+        dept_data = df.groupby("department")["wait_time_minutes"].mean()
+        st.bar_chart(dept_data)
+    with col2:
+        st.subheader("Resource Allocation")
+        fig, ax = plt.subplots()
+        df["department"].value_counts().plot(kind="pie", autopct="%1.1f%%", ax=ax)
         st.pyplot(fig)
     
-    with col2:
-        st.markdown("""
-        <div class="card">
-        <h4>Key Findings:</h4>
-        <ul>
-            <li>Customs processing takes 2.3× longer than Operations</li>
-            <li>67% of delays occur during shift changes</li>
-            <li>Manual inspections add 45 mins avg delay</li>
-        </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Example before/after comparison
-    st.subheader("Process Improvement Potential")
-    cols = st.columns(2)
-    with cols[0]:
-        st.image("https://via.placeholder.com/400x250?text=Current+Process", 
-                caption="Current Process (Avg 90 mins)")
-    with cols[1]:
-        st.image("https://via.placeholder.com/400x250?text=Optimized+Process", 
-                caption="Target Process (Est. 45 mins)")
+    # Row 3: Image 8
+    st.subheader("Optimization Potential")
+    display_image("image8", "Improvement Opportunities")
 
 # --- Tab 4: Policy Recommendations ---
 with tab4:
-    st.subheader("Strategic Roadmap")
+    st.header("Strategic Policy Implementation")
     
-    roadmap = """
+    st.subheader("Implementation Roadmap")
+    st.markdown("""
     ```mermaid
     gantt
         title KPA Improvement Timeline
@@ -222,8 +257,7 @@ with tab4:
         Automated Inspection    :2024-01-01, 365d
         Cargo Lane Expansion    :2024-06-01, 540d
     ```
-    """
-    st.markdown(roadmap)
+    """)
     
     cols = st.columns(3)
     with cols[0]:
@@ -231,25 +265,23 @@ with tab4:
         <div class="card">
         <h4>🔄 Process Changes</h4>
         <ul>
-            <li>Digitize 100% of documentation</li>
+            <li>Digitize documentation</li>
             <li>Implement RFID tracking</li>
-            <li>Automate inspection checklists</li>
+            <li>Automate inspections</li>
         </ul>
         </div>
         """, unsafe_allow_html=True)
-    
     with cols[1]:
         st.markdown("""
         <div class="card">
         <h4>🏗️ Infrastructure</h4>
         <ul>
             <li>Expand Gate 24 capacity</li>
-            <li>Build inland clearance depots</li>
-            <li>Install smart traffic systems</li>
+            <li>Build inland depots</li>
+            <li>Smart traffic systems</li>
         </ul>
         </div>
         """, unsafe_allow_html=True)
-    
     with cols[2]:
         st.markdown("""
         <div class="card">
@@ -257,7 +289,7 @@ with tab4:
         <ul>
             <li>50% faster processing</li>
             <li>30% higher throughput</li>
-            <li>24/7 clearance ops</li>
+            <li>24/7 operations</li>
         </ul>
         </div>
         """, unsafe_allow_html=True)
