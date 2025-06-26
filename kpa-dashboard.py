@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from datetime import datetime
 
 # Page configuration
@@ -94,10 +93,8 @@ with tab1:
     with col2:
         st.subheader("Gate Utilization Distribution")
         gate_dist = df['gate'].value_counts()
-        fig, ax = plt.subplots()
-        ax.pie(gate_dist, labels=gate_dist.index, autopct='%1.1f%%', startangle=90)
-        ax.axis('equal')
-        st.pyplot(fig)
+        st.dataframe(gate_dist.style.format("{:.1%}", subset=["count"]), height=300)
+        st.bar_chart(gate_dist)
     
     st.markdown("""
     <div class="card">
@@ -121,11 +118,8 @@ with tab2:
     
     with col2:
         st.subheader("Wait Time Distribution by Gate")
-        fig, ax = plt.subplots()
-        df.boxplot(column='wait_time_minutes', by='gate', ax=ax)
-        plt.title('')
-        plt.suptitle('')
-        st.pyplot(fig)
+        wait_stats = df.groupby('gate')['wait_time_minutes'].agg(['mean', 'median', 'std'])
+        st.dataframe(wait_stats.style.format("{:.1f}"))
     
     st.markdown("""
     <div class="card">
