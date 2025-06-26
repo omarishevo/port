@@ -38,12 +38,6 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         margin-bottom: 20px;
     }
-    .metric-card {
-        background-color: #f8f9fa;
-        border-left: 4px solid #0d6efd;
-        padding: 15px;
-        border-radius: 5px;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -164,10 +158,10 @@ with tab2:
         wait_ranges = pd.cut(df["wait_time_minutes"], bins=bins, labels=labels, include_lowest=True)
         wait_range_counts = wait_ranges.value_counts().sort_index()
         wait_range_df = pd.DataFrame({
-            "Wait Time Range (mins)": wait_range_counts.index.astype(str),
+            "Range": [str(label) for label in wait_range_counts.index],
             "Count": wait_range_counts.values
-        })
-        st.bar_chart(wait_range_df.set_index("Wait Time Range (mins)"))
+        }).set_index("Range")
+        st.bar_chart(wait_range_df)
     with col2:
         st.subheader("Image 5: Awaiting Time")
         display_image("image5", "Average awaiting time distribution")
