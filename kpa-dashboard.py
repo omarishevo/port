@@ -48,14 +48,19 @@ tab1, tab2 = st.tabs(["Traffic Trends", "Gate Analysis"])
 
 with tab1:
     st.subheader("Daily Vehicle Count")
-    st.line_chart({"Vehicles": data["vehicle_count"]})  # Streamlit built-in
-    
+    st.line_chart({"Vehicles": data["vehicle_count"]})
+
     st.subheader("Cargo Type Distribution")
     cargo_counts = {
         cargo: data["cargo_type"].count(cargo) 
         for cargo in set(data["cargo_type"])
     }
-    st.bar_chart(cargo_counts)
+    cargo_labels = list(cargo_counts.keys())
+    cargo_values = list(cargo_counts.values())
+    st.write("### Cargo Types and Counts")
+    for label, val in zip(cargo_labels, cargo_values):
+        st.write(f"- {label}: {val}")
+    st.bar_chart({"Count": cargo_values})
 
 with tab2:
     st.subheader("Wait Time by Gate")
@@ -66,7 +71,12 @@ with tab2:
         ])
         for gate in set(data["gate"])
     }
-    st.bar_chart(gate_wait_times)
+    gate_labels = list(gate_wait_times.keys())
+    gate_values = list(gate_wait_times.values())
+    st.write("### Gates and Average Wait Times")
+    for label, val in zip(gate_labels, gate_values):
+        st.write(f"- {label}: {val:.1f} mins")
+    st.bar_chart({"Avg Wait (mins)": gate_values})
 
 # --- Footer ---
 st.markdown("---")
