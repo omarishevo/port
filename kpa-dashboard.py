@@ -22,7 +22,7 @@ IMAGE_PATHS = {
     "image2": r"C:\Users\Administrator\Desktop\kpa work\output_0_1.png",  # gender distribution by stakeholders.
     "image3": r"C:\Users\Administrator\Desktop\kpa work\output_0_2.png",  # years of experience distribution.
     "image4": r"C:\Users\Administrator\Desktop\kpa work\output_0_3.png",  # visit frequency distirbution.
-    "image5": r"C:\Users\Administrator\Desktop\kpa work\output_0_4.png",  # awaiting time distribution.
+    "image5": r"C:\Users\Administrator\Desktop\kpa work\output_0_4.png",  #  average awaiting time distribution.
     "image6": r"C:\Users\Administrator\Desktop\kpa work\output_0_5.png",  # traffic congestion frequency.
     "image7": r"C:\Users\Administrator\Desktop\kpa work\output_0_6.png",  # gate usage distribution.
     "image8": r"C:\Users\Administrator\Desktop\kpa work\output_0_7.png",  # cargo type distribution.
@@ -164,13 +164,13 @@ with tab1:
     
     # Row 2: Image 1
     st.subheader("Traffic Flow Analysis")
-    display_image("image1", "Traffic Flow Visualization")
+    display_image("image1", "distribution of stakeholders by nationality")
     
     # Row 3: Image 2 and Hourly Chart
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Gate Congestion Heatmap")
-        display_image("image2", "Gate Utilization Heatmap")
+        display_image("image2", "gender distribution by stakeholders")
     with col2:
         st.subheader("Hourly Traffic Distribution")
         hour_data = df["hour"].value_counts().sort_index()
@@ -178,7 +178,7 @@ with tab1:
     
     # Row 4: Image 3
     st.subheader("Peak Hour Patterns")
-    display_image("image3", "Hourly Traffic Analysis")
+    display_image("image3", "years of experience distribution")
 
 # --- Tab 2: Congestion Analysis ---
 with tab2:
@@ -200,16 +200,16 @@ with tab2:
     
     # Row 2: Image 4
     st.subheader("Congestion Hotspots")
-    display_image("image4", "Congestion Hotspot Map")
+    display_image("image4", "visit frequency distirbution")
     
     # Row 3: Image 5 and 6
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Delay Cause Breakdown")
-        display_image("image5", "Root Cause Analysis")
+        display_image("image5", " average awaiting time distribution")
     with col2:
         st.subheader("Process Bottlenecks")
-        display_image("image6", "Clearance Process Flow")
+        display_image("image6", "traffic congestion frequency")
 
 # --- Tab 3: Operational Efficiency ---
 with tab3:
@@ -217,7 +217,7 @@ with tab3:
     
     # Row 1: Image 7
     st.subheader("Department Performance Metrics")
-    display_image("image7", "Efficiency Benchmarking")
+    display_image("image7", "gate usage distribution")
     
     # Row 2: Charts
     col1, col2 = st.columns(2)
@@ -233,7 +233,7 @@ with tab3:
     
     # Row 3: Image 8
     st.subheader("Optimization Potential")
-    display_image("image8", "Improvement Opportunities")
+    display_image("image8", "cargo type distribution.")
 
 # --- Tab 4: Policy Recommendations ---
 with tab4:
