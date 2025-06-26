@@ -10,7 +10,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- Generate Data (No Pandas) ---
+# --- Generate Data ---
 def generate_data():
     dates = [datetime(2023, 1, 1) + timedelta(days=i) for i in range(365)]
     vehicle_counts = [random.randint(400, 600) + int(50 * np.sin(i/10)) for i in range(365)]
@@ -48,19 +48,21 @@ tab1, tab2 = st.tabs(["Traffic Trends", "Gate Analysis"])
 
 with tab1:
     st.subheader("Daily Vehicle Count")
-    st.line_chart({"Vehicles": data["vehicle_count"]})
+    st.line_chart(data["vehicle_count"])  # Just list is fine here
 
     st.subheader("Cargo Type Distribution")
     cargo_counts = {
         cargo: data["cargo_type"].count(cargo) 
         for cargo in set(data["cargo_type"])
     }
-    cargo_labels = list(cargo_counts.keys())
-    cargo_values = list(cargo_counts.values())
-    st.write("### Cargo Types and Counts")
-    for label, val in zip(cargo_labels, cargo_values):
-        st.write(f"- {label}: {val}")
-    st.bar_chart({"Count": cargo_values})
+
+    # Convert dict to a list of values (bar_chart takes a list)
+    values = list(cargo_counts.values())
+    st.bar_chart(values)
+
+    # Add manual labels
+    for cargo, count in cargo_counts.items():
+        st.write(f"{cargo}: {count}")
 
 with tab2:
     st.subheader("Wait Time by Gate")
@@ -71,12 +73,14 @@ with tab2:
         ])
         for gate in set(data["gate"])
     }
-    gate_labels = list(gate_wait_times.keys())
-    gate_values = list(gate_wait_times.values())
-    st.write("### Gates and Average Wait Times")
-    for label, val in zip(gate_labels, gate_values):
-        st.write(f"- {label}: {val:.1f} mins")
-    st.bar_chart({"Avg Wait (mins)": gate_values})
+
+    # Convert dict to list of values
+    values = list(gate_wait_times.values())
+    st.bar_chart(values)
+
+    # Manual labels
+    for gate, wait in gate_wait_times.items():
+        st.write(f"{gate}: {wait:.1f} mins")
 
 # --- Footer ---
 st.markdown("---")
