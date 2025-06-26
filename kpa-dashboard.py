@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 from PIL import Image
-import os
 
 # --- Page Config ---
 st.set_page_config(
@@ -124,7 +123,8 @@ with tab1:
     with col1:
         st.subheader("Gate Utilization (%)")
         gate_counts = df["gate"].value_counts(normalize=True) * 100
-        st.bar_chart(gate_counts)
+        gate_df = pd.DataFrame({"Gate": gate_counts.index, "Utilization": gate_counts.values}).set_index("Gate")
+        st.bar_chart(gate_df)
     with col2:
         st.subheader("Image 2: Gender Distribution")
         display_image("image2", "Gender distribution by stakeholders")
@@ -133,7 +133,8 @@ with tab1:
     with col1:
         st.subheader("Hourly Traffic Distribution")
         hour_counts = df["hour"].value_counts().sort_index()
-        st.bar_chart(hour_counts)
+        hour_df = pd.DataFrame({"Hour": hour_counts.index, "Count": hour_counts.values}).set_index("Hour")
+        st.bar_chart(hour_df)
     with col2:
         st.subheader("Image 3: Experience Levels")
         display_image("image3", "Years of experience distribution")
@@ -145,7 +146,8 @@ with tab2:
     with col1:
         st.subheader("Delay Causes Distribution")
         issue_dist = df["issue_type"].value_counts(normalize=True) * 100
-        st.bar_chart(issue_dist)
+        issue_df = pd.DataFrame({"Issue": issue_dist.index, "Percent": issue_dist.values}).set_index("Issue")
+        st.bar_chart(issue_df)
     with col2:
         st.subheader("Image 4: Visit Frequency")
         display_image("image4", "Visit frequency distribution")
@@ -176,7 +178,11 @@ with tab3:
     with col1:
         st.subheader("Processing Time by Department")
         dept_means = df.groupby("department")["wait_time_minutes"].mean()
-        st.bar_chart(dept_means)
+        dept_means_df = pd.DataFrame({
+            "Department": dept_means.index,
+            "Average Wait Time": dept_means.values
+        }).set_index("Department")
+        st.bar_chart(dept_means_df)
     with col2:
         st.subheader("Image 7: Gate Usage")
         display_image("image7", "Gate usage distribution")
@@ -185,7 +191,11 @@ with tab3:
     with col1:
         st.subheader("Department Workload")
         dept_counts = df["department"].value_counts()
-        st.bar_chart(dept_counts)
+        dept_counts_df = pd.DataFrame({
+            "Department": dept_counts.index,
+            "Count": dept_counts.values
+        }).set_index("Department")
+        st.bar_chart(dept_counts_df)
     with col2:
         st.subheader("Image 8: Cargo Types")
         display_image("image8", "Cargo type distribution")
