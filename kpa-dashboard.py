@@ -70,9 +70,9 @@ with cols[3]:
 
 # --- Tabs ---
 tab1, tab2, tab3, tab4 = st.tabs([
-    "🚦 Traffic Patterns", 
-    "⚠️ Congestion Analysis", 
-    "⚙️ Operational Efficiency", 
+    "🚦 Traffic Patterns",
+    "⚠️ Congestion Analysis",
+    "⚙️ Operational Efficiency",
     "📜 Policy Recommendations"
 ])
 
