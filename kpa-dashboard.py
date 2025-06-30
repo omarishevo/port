@@ -4,108 +4,180 @@ import numpy as np
 from datetime import datetime
 from PIL import Image
 import os
-import matplotlib.pyplot as plt
-import seaborn as sns
 
-# --- Generate Images for Dashboard ---
-def generate_dashboard_images():
-    output_dir = r"C:\\Users\\Administrator\\Desktop\\kpa work"
+# --- Page Config ---
+st.set_page_config(
+    page_title="KPA Stakeholder Analytics Dashboard",
+    page_icon="🚢",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# --- Placeholder Image Generator ---
+def generate_placeholder_images():
+    output_dir = "kpa_work"
     os.makedirs(output_dir, exist_ok=True)
-    sns.set(style="whitegrid")
+    for i in range(10):
+        img_path = os.path.join(output_dir, f"output_0_{i}.png")
+        if not os.path.exists(img_path):
+            from PIL import ImageDraw
+            img = Image.new("RGB", (800, 400), color=(220, 220, 220))
+            d = ImageDraw.Draw(img)
+            d.text((100, 180), f"Placeholder Image {i+1}", fill=(0, 0, 0))
+            img.save(img_path)
+    return {f"image{i+1}": os.path.join(output_dir, f"output_0_{i}.png") for i in range(10)}
 
-    # 0. Stakeholder Nationality
-    plt.figure(figsize=(8, 6))
-    data = pd.Series(["Kenyan", "Tanzanian", "Ugandan", "Rwandese", "Other"]).sample(200, replace=True)
-    sns.countplot(y=data, order=data.value_counts().index)
-    plt.title("Distribution of Stakeholders by Nationality")
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "output_0_0.png"))
-    plt.close()
+IMAGE_PATHS = generate_placeholder_images()
 
-    # 1. Gender Distribution
-    plt.figure(figsize=(6, 6))
-    genders = pd.Series(np.random.choice(["Male", "Female"], 200, p=[0.7, 0.3]))
-    genders.value_counts().plot.pie(autopct='%1.1f%%', startangle=90)
-    plt.title("Gender Distribution by Stakeholders")
-    plt.ylabel("")
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "output_0_1.png"))
-    plt.close()
+# --- Data Simulation ---
+@st.cache_data
+def load_data():
+    dates = pd.date_range(start="2023-01-01", end="2023-12-31")
+    return pd.DataFrame({
+        "date": dates,
+        "vehicle_count": np.random.poisson(500, len(dates)),
+        "wait_time_minutes": np.random.normal(90, 30, len(dates)).clip(10, 360),
+        "gate": np.random.choice(["Gate 12", "Gate 9", "Gate 15", "Gate 24"], len(dates)),
+        "issue_type": np.random.choice(["Clearance Delays", "Slow Processing", "Too Many Trucks", "Security Checks"], len(dates)),
+        "department": np.random.choice(["Operations", "Security", "Logistics", "Customs"], len(dates)),
+        "hour": np.random.choice(range(6, 21), len(dates))
+    })
 
-    # 2. Years of Experience
-    plt.figure(figsize=(8, 6))
-    experience = np.random.choice(["0–2 yrs", "3–5 yrs", "6–10 yrs", "10+ yrs"], 200)
-    sns.countplot(x=experience, order=["0–2 yrs", "3–5 yrs", "6–10 yrs", "10+ yrs"])
-    plt.title("Years of Experience Distribution")
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "output_0_2.png"))
-    plt.close()
+df = load_data()
 
-    # 3. Visit Frequency
-    plt.figure(figsize=(8, 6))
-    visits = np.random.choice(["Daily", "Weekly", "Monthly", "Rarely"], 200)
-    sns.countplot(x=visits, order=["Daily", "Weekly", "Monthly", "Rarely"])
-    plt.title("Visit Frequency Distribution")
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "output_0_3.png"))
-    plt.close()
+# --- Display Helper ---
+def display_image(img_key, caption, col=None):
+    try:
+        img = Image.open(IMAGE_PATHS[img_key])
+        if col:
+            with col:
+                st.image(img, caption=caption, use_container_width=True)
+        else:
+            st.image(img, caption=caption, use_container_width=True)
+    except:
+        st.warning(f"Image for {caption} is missing.")
 
-    # 4. Average Awaiting Time
-    plt.figure(figsize=(8, 6))
-    waits = np.random.normal(90, 30, 200).clip(10, 360)
-    sns.histplot(waits, bins=20, kde=True)
-    plt.title("Average Awaiting Time (mins)")
-    plt.xlabel("Minutes")
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "output_0_4.png"))
-    plt.close()
+# --- Dashboard Layout ---
+st.title("🚢 KPA Stakeholder Traffic Analytics Dashboard")
 
-    # 5. Traffic Congestion Frequency
-    plt.figure(figsize=(8, 6))
-    congestion = np.random.choice(["Low", "Moderate", "High", "Severe"], 200)
-    sns.countplot(x=congestion, order=["Low", "Moderate", "High", "Severe"])
-    plt.title("Traffic Congestion Frequency")
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "output_0_5.png"))
-    plt.close()
+# --- Header Section ---
+st.markdown("""
+<div style="background-color: #f9f9f9; padding: 15px; border-radius: 10px;">
+<h3 style="color: #0d6efd;">General Objectives</h3>
+<ul>
+    <li><strong>Traffic Volume & Pattern:</strong> Analyze gate load and peak hours</li>
+    <li><strong>Congestion Causes:</strong> Identify systemic bottlenecks</li>
+    <li><strong>Operational Efficiency:</strong> Streamline operations</li>
+    <li><strong>Policy Strategy:</strong> Recommend reforms</li>
+</ul>
+</div>
+""", unsafe_allow_html=True)
 
-    # 6. Gate Usage
-    plt.figure(figsize=(8, 6))
-    gates = np.random.choice(["Gate 12", "Gate 9", "Gate 15", "Gate 24"], 200)
-    sns.countplot(y=gates, order=["Gate 12", "Gate 9", "Gate 15", "Gate 24"])
-    plt.title("Gate Usage Distribution")
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "output_0_6.png"))
-    plt.close()
+# --- Key Metrics ---
+cols = st.columns(4)
+with cols[0]:
+    st.metric("Avg Daily Vehicles", f"{int(df['vehicle_count'].mean()):,}", "5% above target")
+with cols[1]:
+    st.metric("Avg Wait Time", f"{int(df['wait_time_minutes'].mean())} mins", "12% longer than benchmark")
+with cols[2]:
+    st.metric("Peak Hour Congestion", "60%", "10AM–2PM daily")
+with cols[3]:
+    st.metric("Gate 12 Load", "35%", "Primary bottleneck")
 
-    # 7. Cargo Type
-    plt.figure(figsize=(8, 6))
-    cargo = np.random.choice(["Container", "Bulk", "Liquid", "Vehicles", "Other"], 200)
-    sns.countplot(x=cargo, order=pd.Series(cargo).value_counts().index)
-    plt.title("Cargo Type Distribution")
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "output_0_7.png"))
-    plt.close()
+# --- Tabs ---
+tab1, tab2, tab3, tab4 = st.tabs([
+    "🚦 Traffic Patterns", 
+    "⚠️ Congestion Analysis", 
+    "⚙️ Operational Efficiency", 
+    "📜 Policy Recommendations"
+])
 
-    # 8. Time of Day
-    plt.figure(figsize=(8, 6))
-    time_periods = np.random.choice(["Morning", "Midday", "Afternoon", "Evening"], 200)
-    sns.countplot(x=time_periods, order=["Morning", "Midday", "Afternoon", "Evening"])
-    plt.title("Time of the Day Distribution")
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "output_0_8.png"))
-    plt.close()
+with tab1:
+    st.header("Traffic Volume and Pattern Assessment")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Traffic Over Time")
+        st.line_chart(df.groupby("date")["vehicle_count"].sum())
+    with col2:
+        st.subheader("Image 1: Nationality")
+        display_image("image1", "Distribution of stakeholders by nationality")
 
-    # 9. Common Issues
-    plt.figure(figsize=(8, 6))
-    issues = ["Clearance Delays", "Too Many Trucks", "Security Checks", "Slow Processing"]
-    counts = [120, 90, 45, 70]
-    issue_df = pd.DataFrame({"Issue": issues, "Count": counts})
-    sns.barplot(x="Count", y="Issue", data=issue_df, palette="mako")
-    plt.title("Common Issues Faced by Stakeholders")
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "output_0_9.png"))
-    plt.close()
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Gate Utilization")
+        st.bar_chart(df["gate"].value_counts())
+    with col2:
+        st.subheader("Image 2: Gender")
+        display_image("image2", "Gender distribution")
 
-# Call image generator once before dashboard runs
-generate_dashboard_images()
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Hourly Traffic")
+        st.bar_chart(df["hour"].value_counts().sort_index())
+    with col2:
+        st.subheader("Image 3: Experience")
+        display_image("image3", "Years of experience")
+
+with tab2:
+    st.header("Congestion Cause Identification")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Delays by Cause")
+        st.bar_chart(df["issue_type"].value_counts())
+    with col2:
+        st.subheader("Image 4: Visit Frequency")
+        display_image("image4", "Visit frequency")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Wait Time Range")
+        bins = [0, 30, 60, 120, 240, 360]
+        labels = ["0–30", "31–60", "61–120", "121–240", "241–360"]
+        df["wait_range"] = pd.cut(df["wait_time_minutes"], bins=bins, labels=labels)
+        st.bar_chart(df["wait_range"].value_counts().sort_index())
+    with col2:
+        st.subheader("Image 5: Awaiting Time")
+        display_image("image5", "Average awaiting time")
+
+    st.subheader("Image 6: Traffic Congestion")
+    display_image("image6", "Congestion frequency")
+
+with tab3:
+    st.header("Operational Efficiency")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Avg Wait by Dept")
+        st.bar_chart(df.groupby("department")["wait_time_minutes"].mean())
+    with col2:
+        st.subheader("Image 7: Gate Usage")
+        display_image("image7", "Gate usage")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Department Load")
+        st.bar_chart(df["department"].value_counts())
+    with col2:
+        st.subheader("Image 8: Cargo Types")
+        display_image("image8", "Cargo type")
+
+    st.subheader("Image 9: Time of Day")
+    display_image("image9", "Time of day")
+
+with tab4:
+    st.header("Policy Recommendations")
+    st.subheader("Image 10: Common Issues")
+    display_image("image10", "Common issues faced by stakeholders")
+
+    st.markdown("""
+    - **Short-Term (0–3 months)**: Launch truck appointment system, improve signage  
+    - **Medium-Term (3–12 months)**: Digitize all paperwork, automate check-ins  
+    - **Long-Term (1–3 years)**: Build new lanes, expand inspection units
+    """)
+
+# --- Footer ---
+st.markdown("---")
+st.markdown(f"""
+<div style="text-align: center; color: #6c757d;">
+    <p>KPA Operational Dashboard • Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+</div>
+""", unsafe_allow_html=True)
